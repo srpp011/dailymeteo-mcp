@@ -19,6 +19,8 @@ claude plugin marketplace add srpp011/dailymeteo-mcp
 claude plugin install dailymeteo@dailymeteo
 ```
 
+The first start downloads about 60 MB. If the server shows *failed* in a new session, wait a minute and reconnect it with `/mcp`.
+
 All other clients need [uv](https://docs.astral.sh/uv/) and run `uvx --python 3.12 dailymeteo-mcp`. See [Configuration](#configuration).
 
 ## Tools

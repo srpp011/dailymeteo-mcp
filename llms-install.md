@@ -23,6 +23,8 @@ claude plugin install dailymeteo@dailymeteo
 
 If plugins are not available, use `claude mcp add dailymeteo -s user -- uvx --python 3.12 dailymeteo-mcp` instead.
 
+Then run `uvx --python 3.12 dailymeteo-mcp@0.2.2 --version` once. The first start downloads Python and packages (about 60 MB); doing it now keeps the client's start-up check from timing out. Tell the user to start a new session, or run `/mcp` and reconnect, to load the server.
+
 **Claude Desktop.** Open the config file through Settings → Developer → Edit Config. Do not guess its path: Microsoft Store installs keep it in a different place. Add the following under `mcpServers`, keeping every other key, then quit Claude Desktop completely (tray icon → Quit) and start it again:
 
 ```json
@@ -59,5 +61,6 @@ Restart the client. The server should expose 11 tools. Test with a free call: th
 ## Troubleshooting
 
 - `uvx` not found: uv is not on the PATH yet. Open a new terminal or restart the client.
+- Server shows *failed* right after installing: the first start was still downloading. Run the `--version` command above once, then reconnect (`/mcp` in Claude Code) or restart the client.
 - A tool says the account is missing although the variables were set: the client was started before they were set. Restart it fully. Claude Desktop does not pass user environment variables to servers, so use its `env` object.
 - Daily requests over 1,000 credits ask for confirmation. This is intended and mirrors the DailyMeteo app.
