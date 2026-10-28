@@ -7,7 +7,7 @@ name = "dailymeteo-mcp"
 dynamic = ["version"]
 description = "MCP server for DailyMeteo: historical weather and climate normals for any land location, 1961 to the present"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.15"
 license = "GPL-2.0-or-later"
 license-files = ["LICENSE"]
 authors = [

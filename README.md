@@ -19,7 +19,7 @@ claude plugin marketplace add srpp011/dailymeteo-mcp
 claude plugin install dailymeteo@dailymeteo
 ```
 
-All other clients need [uv](https://docs.astral.sh/uv/) and run `uvx dailymeteo-mcp`. See [Configuration](#configuration).
+All other clients need [uv](https://docs.astral.sh/uv/) and run `uvx --python 3.12 dailymeteo-mcp`. See [Configuration](#configuration).
 
 ## Tools
 
@@ -53,7 +53,7 @@ All environment variables are optional. Without any of them, monthly and annual 
 ### Claude Code
 
 ```
-claude mcp add dailymeteo -s user -e DAILYMETEO_EMAIL=you@example.com -e DAILYMETEO_PASSWORD=... -- uvx dailymeteo-mcp
+claude mcp add dailymeteo -s user -e DAILYMETEO_EMAIL=you@example.com -e DAILYMETEO_PASSWORD=... -- uvx --python 3.12 dailymeteo-mcp
 ```
 
 ### Claude Desktop, Cursor, VS Code (`mcpServers` JSON)
@@ -63,7 +63,7 @@ claude mcp add dailymeteo -s user -e DAILYMETEO_EMAIL=you@example.com -e DAILYME
   "mcpServers": {
     "dailymeteo": {
       "command": "uvx",
-      "args": ["dailymeteo-mcp"],
+      "args": ["--python", "3.12", "dailymeteo-mcp"],
       "env": { "DAILYMETEO_EMAIL": "you@example.com", "DAILYMETEO_PASSWORD": "..." }
     }
   }

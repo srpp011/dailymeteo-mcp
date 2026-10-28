@@ -1,7 +1,7 @@
 {
   "name": "dailymeteo",
   "displayName": "DailyMeteo",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Historical weather and climate normals for any land location: 1 km grids, 1961 to today. Daily, monthly and annual values, climate normals, area and point-history downloads.",
   "author": { "name": "Srđan Popović", "url": "https://github.com/srpp011" },
   "homepage": "https://app.dailymeteo.com/",

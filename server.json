@@ -8,12 +8,12 @@
     "url": "https://github.com/srpp011/dailymeteo-mcp",
     "source": "github"
   },
-  "version": "0.2.1",
+  "version": "0.2.2",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "dailymeteo-mcp",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
@@ -46,6 +46,13 @@
           "isRequired": false,
           "isSecret": false,
           "format": "string"
+        }
+      ],
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "--python",
+          "value": "3.12"
         }
       ]
     }

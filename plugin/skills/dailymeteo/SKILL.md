@@ -28,9 +28,8 @@ tmean, tmax, tmin (°C) and prcp (mm). They are model grids, not station measure
      `download_gridded_files` (free). Tell the user the size first.
 5. **Credits / plan** → `account_status`.
 
-If a tool reports a missing account, the user can add it by reinstalling the plugin
-(`claude plugin uninstall dailymeteo@dailymeteo`, then `claude plugin install dailymeteo@dailymeteo`). The install
-asks for the email and password, and the password goes to the secure credential store. Free tools work without it.
+If a tool reports a missing account, the user can add it with `/plugin configure dailymeteo@dailymeteo`.
+The password goes to the secure credential store. Free tools work without an account.
 
 ## Presenting results
 
