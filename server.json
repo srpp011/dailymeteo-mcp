@@ -1,0 +1,53 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.srpp011/dailymeteo-mcp",
+  "title": "DailyMeteo",
+  "description": "Historical weather and climate normals for any land location, 1 km grids, 1961 to today",
+  "websiteUrl": "https://app.dailymeteo.com/",
+  "repository": {
+    "url": "https://github.com/srpp011/dailymeteo-mcp",
+    "source": "github"
+  },
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "dailymeteo-mcp",
+      "version": "0.2.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "DAILYMETEO_EMAIL",
+          "description": "DailyMeteo account email; enables daily data, credits, point history and area downloads",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "DAILYMETEO_PASSWORD",
+          "description": "DailyMeteo account password",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "DAILYMETEO_API_KEY",
+          "description": "Alternative to the account, for daily point data only",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "DAILYMETEO_OUTPUT_DIR",
+          "description": "Folder for CSV files and downloads (default ~/dailymeteo)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}

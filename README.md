@@ -1,5 +1,7 @@
 # dailymeteo-mcp
 
+<!-- mcp-name: io.github.srpp011/dailymeteo-mcp -->
+
 An [MCP](https://modelcontextprotocol.io/) server for [DailyMeteo](https://app.dailymeteo.com/). With it, an AI assistant (Claude, VS Code, Cursor and other MCP clients) can answer questions about historical weather and climate change for any land location. Data are 1 km grids from 1961 to the present.
 
 > *How much warmer are July days in Belgrade now than in 1961–1990?*

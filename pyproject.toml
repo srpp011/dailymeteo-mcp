@@ -31,6 +31,8 @@ test = ["pytest>=7"]
 dailymeteo-mcp = "dailymeteo_mcp.server:main"
 
 [project.urls]
+"Source" = "https://github.com/srpp011/dailymeteo-mcp"
+"Issues" = "https://github.com/srpp011/dailymeteo-mcp/issues"
 "DailyMeteo" = "https://app.dailymeteo.com/"
 "Python client" = "https://pypi.org/project/dailymeteo/"
 
