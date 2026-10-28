@@ -1,0 +1,14 @@
+{
+  "name": "dailymeteo",
+  "description": "DailyMeteo: historical weather and climate data for AI assistants",
+  "owner": { "name": "Srđan Popović", "url": "https://github.com/srpp011" },
+  "plugins": [
+    {
+      "name": "dailymeteo",
+      "source": "./plugin",
+      "description": "Historical weather and climate normals for any land location: 1 km grids, 1961 to today",
+      "category": "data",
+      "tags": ["weather", "climate", "meteorology", "mcp"]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "dailymeteo": {
+      "command": "uvx",
+      "args": ["dailymeteo-mcp@0.2.1"],
+      "env": {
+        "DAILYMETEO_EMAIL": "${user_config.dailymeteo_email}",
+        "DAILYMETEO_PASSWORD": "${user_config.dailymeteo_password}"
+      }
+    }
+  }
+}

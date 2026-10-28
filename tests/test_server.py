@@ -175,3 +175,17 @@ def test_stdio_end_to_end():
 
     out = asyncio.run(run())
     assert out["variables"]["tmax"]["normals"][0]["change"] > 0
+
+
+def test_blank_plugin_settings_mean_no_account(monkeypatch):
+    monkeypatch.setenv("DAILYMETEO_EMAIL", "${user_config.dailymeteo_email}")
+    monkeypatch.setenv("DAILYMETEO_PASSWORD", "")
+    assert s._account() is None
+    with pytest.raises(s.ToolError, match="DAILYMETEO_EMAIL"):
+        s.account_status()
+
+
+def test_version_flag(capsys, monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["dailymeteo-mcp", "--version"])
+    s.main()
+    assert capsys.readouterr().out.strip() == f"dailymeteo-mcp {s.__version__}"

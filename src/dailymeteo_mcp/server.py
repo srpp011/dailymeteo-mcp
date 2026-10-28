@@ -94,11 +94,16 @@ def _guard(fn):
     return wrapper
 
 
+def _env(name: str) -> str | None:
+    """Environment value, or None when empty or an unexpanded ${...} placeholder (optional plugin settings left blank)."""
+    v = (os.environ.get(name) or "").strip()
+    return None if not v or v.startswith("${") else v
+
+
 @functools.lru_cache(maxsize=1)
 def _account() -> dm.Account | None:
-    if os.environ.get("DAILYMETEO_EMAIL") and os.environ.get("DAILYMETEO_PASSWORD"):
-        return dm.Account()
-    return None
+    email, password = _env("DAILYMETEO_EMAIL"), _env("DAILYMETEO_PASSWORD")
+    return dm.Account(email, password) if email and password else None
 
 
 def _require_account() -> dm.Account:
@@ -284,7 +289,7 @@ def get_weather(
     else:
         raise ToolError("give start and end, or dates")
 
-    key, acct = os.environ.get("DAILYMETEO_API_KEY"), None
+    key, acct = _env("DAILYMETEO_API_KEY"), None
     credits = 0
     if time_scale == "day":
         acct = _account()
@@ -491,6 +496,12 @@ def download_gridded_files(
 
 
 def main() -> None:
+    import sys
+
+    if "--version" in sys.argv[1:]:
+        # quick install check for people and agents; without it the server waits on stdin
+        print(f"dailymeteo-mcp {__version__}")
+        return
     mcp.run()
 
 

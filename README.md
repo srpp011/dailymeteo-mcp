@@ -8,6 +8,19 @@ An [MCP](https://modelcontextprotocol.io/) server for [DailyMeteo](https://app.d
 > *Which was the wettest year in Lisbon since 1961?*
 > *Download daily mean temperature grids for Europe for 2003.*
 
+## Install
+
+**Easiest:** ask your AI assistant (Claude Code, Cursor, Cline…): *"Install the DailyMeteo MCP server from github.com/srpp011/dailymeteo-mcp"*. It will follow [llms-install.md](llms-install.md).
+
+**Claude Code plugin.** The plugin includes the server and a skill that tells Claude which tool to use. It asks for your DailyMeteo email and password, which are optional:
+
+```
+claude plugin marketplace add srpp011/dailymeteo-mcp
+claude plugin install dailymeteo@dailymeteo
+```
+
+All other clients need [uv](https://docs.astral.sh/uv/) and run `uvx dailymeteo-mcp`. See [Configuration](#configuration).
+
 ## Tools
 
 Everything the DailyMeteo app offers, for land areas worldwide, from 1961 to the present:
