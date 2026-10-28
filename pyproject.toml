@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dailymeteo-mcp"
+dynamic = ["version"]
+description = "MCP server for DailyMeteo: historical weather and climate normals for any land location, 1961 to the present"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-2.0-or-later"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Aleksandar Sekulić", email = "asekulic@grf.bg.ac.rs" },
+    { name = "Milan Kilibarda", email = "kili@grf.bg.ac.rs" },
+]
+maintainers = [{ name = "Srđan Popović" }]
+keywords = ["mcp", "model context protocol", "meteorology", "climate", "weather history", "temperature", "precipitation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+dependencies = ["dailymeteo>=0.2.0", "mcp>=2.3,<3"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+dailymeteo-mcp = "dailymeteo_mcp.server:main"
+
+[project.urls]
+"DailyMeteo" = "https://app.dailymeteo.com/"
+"Python client" = "https://pypi.org/project/dailymeteo/"
+
+[tool.hatch.version]
+path = "src/dailymeteo_mcp/__init__.py"
+
+[tool.pytest.ini_options]
+markers = ["network: tests that call the DailyMeteo API or Zenodo"]
