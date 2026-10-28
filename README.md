@@ -8,30 +8,37 @@ An [MCP](https://modelcontextprotocol.io/) server for [DailyMeteo](https://app.d
 
 ## Tools
 
+Everything the DailyMeteo app offers, for land areas worldwide, from 1961 to the present:
+
 | Tool | What it does | Cost |
 |---|---|---|
 | `find_location` | Place name → latitude/longitude (OpenStreetMap) | free |
-| `get_monthly_or_annual` | Monthly or annual values, summary, trend per decade, optional CSV | free |
-| `get_climate_normals` | Normals 1961–1990 and 1991–2020 and their difference (year, months, or a calendar day) | free |
-| `get_daily_values` | Daily values | 1 credit per day, API key required |
-| `list_gridded_files` | MeteoEurope1km archives on Zenodo (Europe, 1961–2020, GeoTIFF) | free |
-| `download_gridded_files` | Download, verify MD5, unzip | free |
+| `find_area` | Area name → boundary polygon and size, for area downloads | free |
+| `get_weather` | Daily, monthly or annual values for a location; several variables at once; summary, yearly aggregates, trend, CSV | monthly/annual free; daily 1 credit per day and variable |
+| `get_climate_normals` | Normals 1961–1990 and 1991–2020 and their change (year, months, or a calendar day) | free |
+| `account_status` | Plan, API credits, bulk credits | free |
+| `request_point_history` | Every variable, daily, for one location (whole record by default), CSV by email | 1 bulk credit |
+| `estimate_area_download` | Cost of daily rasters clipped to an area (max 3,000 km²) | free |
+| `request_area_download` | Daily GeoTIFF rasters clipped to an area, by email | API credits |
+| `app_link` | Opens the location and series in the DailyMeteo app (map, chart, CSV/PDF export) | free |
+| `list_gridded_files` / `download_gridded_files` | MeteoEurope1km raster archives on Zenodo (Europe, 1961–2020, incl. sea-level pressure) | free |
 
-Variables are `tmean`, `tmax` and `tmin` in °C, and `prcp` in mm (monthly and annual values are totals). The gridded files also include `slp` (sea-level pressure).
+Variables are `tmean`, `tmax` and `tmin` in °C, and `prcp` in mm (monthly and annual values are totals).
 
-Daily requests longer than 31 days are refused until the user agrees to the credit cost. Large grid downloads (over 5 GB by default) are refused the same way.
+As in the app, daily requests over 1,000 credits ask for the user's confirmation, and area downloads should be estimated before they are ordered. Repeating the same daily request is not charged again. Long series are not dumped into the conversation. They are summarised (per variable and per year) and saved as CSV.
 
 ## Configuration
 
-Environment variables, both optional:
+All environment variables are optional. Without any of them, monthly and annual values, normals, links and Zenodo grids work.
 
-- `DAILYMETEO_API_KEY`: needed only for daily values. Get one at https://app.dailymeteo.com/ → Account → API Keys.
+- `DAILYMETEO_EMAIL` and `DAILYMETEO_PASSWORD`: your DailyMeteo account. They enable daily values, credits, point history and area downloads. Sign up at https://app.dailymeteo.com/.
+- `DAILYMETEO_API_KEY`: alternative for daily values only (Account → API Keys).
 - `DAILYMETEO_OUTPUT_DIR`: where CSV files and downloads are saved (default `~/dailymeteo`).
 
 ### Claude Code
 
 ```
-claude mcp add dailymeteo -s user -e DAILYMETEO_API_KEY=your-key -- uvx dailymeteo-mcp
+claude mcp add dailymeteo -s user -e DAILYMETEO_EMAIL=you@example.com -e DAILYMETEO_PASSWORD=... -- uvx dailymeteo-mcp
 ```
 
 ### Claude Desktop, Cursor, VS Code (`mcpServers` JSON)
@@ -42,7 +49,7 @@ claude mcp add dailymeteo -s user -e DAILYMETEO_API_KEY=your-key -- uvx dailymet
     "dailymeteo": {
       "command": "uvx",
       "args": ["dailymeteo-mcp"],
-      "env": { "DAILYMETEO_API_KEY": "your-key" }
+      "env": { "DAILYMETEO_EMAIL": "you@example.com", "DAILYMETEO_PASSWORD": "..." }
     }
   }
 }
@@ -52,7 +59,7 @@ claude mcp add dailymeteo -s user -e DAILYMETEO_API_KEY=your-key -- uvx dailymet
 
 ```
 docker build -t dailymeteo-mcp .
-claude mcp add-json dailymeteo -s user '{"type":"stdio","command":"docker","args":["run","-i","--rm","-e","DAILYMETEO_API_KEY","-v","/path/to/output:/data","dailymeteo-mcp"]}'
+claude mcp add-json dailymeteo -s user '{"type":"stdio","command":"docker","args":["run","-i","--rm","-e","DAILYMETEO_EMAIL","-e","DAILYMETEO_PASSWORD","-v","/path/to/output:/data","dailymeteo-mcp"]}'
 ```
 
 ## Data and citation
