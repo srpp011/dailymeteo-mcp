@@ -1,13 +1,23 @@
 {
   "name": "dailymeteo",
   "displayName": "DailyMeteo",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Historical weather and climate normals for any land location: 1 km grids, 1961 to today. Daily, monthly and annual values, climate normals, area and point-history downloads.",
-  "author": { "name": "Srđan Popović", "url": "https://github.com/srpp011" },
+  "author": {
+    "name": "Srđan Popović",
+    "url": "https://github.com/srpp011"
+  },
   "homepage": "https://app.dailymeteo.com/",
   "repository": "https://github.com/srpp011/dailymeteo-mcp",
   "license": "GPL-2.0-or-later",
-  "keywords": ["weather", "climate", "meteorology", "temperature", "precipitation", "mcp"],
+  "keywords": [
+    "weather",
+    "climate",
+    "meteorology",
+    "temperature",
+    "precipitation",
+    "mcp"
+  ],
   "userConfig": {
     "dailymeteo_email": {
       "type": "string",
@@ -21,5 +31,10 @@
       "description": "Stored in the secure credential store.",
       "sensitive": true
     }
-  }
+  },
+  "icon": "./icon.svg",
+  "documentationUrl": "https://github.com/srpp011/dailymeteo-mcp#readme",
+  "supportUrl": "https://github.com/srpp011/dailymeteo-mcp/issues",
+  "privacyPolicyUrl": "https://dailymeteo.com/privacy",
+  "termsOfServiceUrl": "https://dailymeteo.com/terms"
 }
