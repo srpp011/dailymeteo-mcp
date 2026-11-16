@@ -1,0 +1,18 @@
+{
+  "upload_type": "software",
+  "title": "dailymeteo-mcp: MCP server for DailyMeteo daily gridded meteorological data",
+  "description": "<p><strong>dailymeteo-mcp</strong> is a Model Context Protocol (MCP) server that gives AI assistants, such as Claude, access to DailyMeteo daily gridded meteorological data at a 1-km spatial resolution: point time series of maximum, minimum and mean air temperature and precipitation for any land location, 1961 to the present, as daily, monthly and annual values and climate normals, together with the MeteoEurope1km dataset (Europe, 1961&ndash;2020) published on Zenodo. It is built on the Python package dailymeteo.</p><p>Installation: <code>uvx dailymeteo-mcp</code>. Source code and setup instructions: <a href=\"https://github.com/srpp011/dailymeteo-mcp\">github.com/srpp011/dailymeteo-mcp</a>.</p>",
+  "creators": [
+    {"name": "Sekulić, Aleksandar", "affiliation": "GILAB DOO Beograd", "orcid": "0000-0002-5515-2779"},
+    {"name": "Kilibarda, Milan", "affiliation": "GILAB DOO Beograd", "orcid": "0000-0002-2930-3596"}
+  ],
+  "contributors": [
+    {"name": "Popović, Srdjan", "affiliation": "GILAB DOO Beograd", "type": "ContactPerson", "orcid": "0009-0008-2894-8764"}
+  ],
+  "license": "gpl-2.0-or-later",
+  "keywords": ["meteorology", "climate", "daily meteorological data", "Model Context Protocol", "MCP", "MeteoEurope1km", "DailyMeteo"],
+  "related_identifiers": [
+    {"identifier": "10.5281/zenodo.23264155", "relation": "isSupplementTo", "resource_type": "dataset", "scheme": "doi"},
+    {"identifier": "https://pypi.org/project/dailymeteo-mcp/", "relation": "isIdenticalTo", "resource_type": "software", "scheme": "url"}
+  ]
+}
