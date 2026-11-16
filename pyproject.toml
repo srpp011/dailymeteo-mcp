@@ -10,11 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10,<3.15"
 license = "GPL-2.0-or-later"
 license-files = ["LICENSE"]
-authors = [
-    { name = "Aleksandar Sekulić", email = "asekulic@grf.bg.ac.rs" },
-    { name = "Milan Kilibarda", email = "kili@grf.bg.ac.rs" },
-]
-maintainers = [{ name = "Srđan Popović" }]
+authors = [{ name = "Srđan Popović" }]
 keywords = ["mcp", "model context protocol", "meteorology", "climate", "weather history", "temperature", "precipitation"]
 classifiers = [
     "Development Status :: 3 - Alpha",
