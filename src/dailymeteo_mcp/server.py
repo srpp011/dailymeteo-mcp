@@ -601,6 +601,8 @@ if REMOTE:
 # --- HTTP routes (remote mode) ---------------------------------------------------------------------
 @mcp.custom_route("/health", methods=["GET"], include_in_schema=False)
 async def health(request: Request) -> Response:
+    if REMOTE:
+        _shared_dir()  # the container health check calls this every 30 s: expired CSV files are deleted on time
     return JSONResponse({"status": "ok", "version": __version__})
 
 
