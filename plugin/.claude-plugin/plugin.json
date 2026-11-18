@@ -26,7 +26,7 @@
       "sensitive": true
     }
   },
-  "icon": "./icon.svg",
+  "icon": "./icon.png",
   "documentationUrl": "https://github.com/srpp011/dailymeteo-mcp#readme",
   "supportUrl": "https://github.com/srpp011/dailymeteo-mcp/issues",
   "privacyPolicyUrl": "https://dailymeteo.com/privacy",

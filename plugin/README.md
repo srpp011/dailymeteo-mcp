@@ -1,6 +1,6 @@
 # DailyMeteo
 
-![DailyMeteo](icon.svg)
+![DailyMeteo](icon.png)
 
 Historical weather and climate data for any place on land, from 1961 to a few days ago, at 1 km resolution. Claude can answer questions such as *"How much warmer are July days in Belgrade now than in 1961–1990?"* or *"Which was the wettest year in Lisbon since 1961?"*.
 
