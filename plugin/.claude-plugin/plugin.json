@@ -1,8 +1,8 @@
 {
   "name": "dailymeteo",
   "displayName": "DailyMeteo",
-  "version": "0.2.3",
-  "description": "Historical weather and climate normals for any land location: 1 km grids, 1961 to today. Daily, monthly and annual values, climate normals, area and point-history downloads.",
+  "version": "0.3.0",
+  "description": "Historical weather and climate normals for any land location: 1 km grids, 1961 to today. Daily, monthly and annual values, climate normals, links to the DailyMeteo app and the MeteoEurope1km archives.",
   "author": {
     "name": "Srđan Popović",
     "url": "https://github.com/srpp011"
@@ -19,16 +19,10 @@
     "mcp"
   ],
   "userConfig": {
-    "dailymeteo_email": {
+    "dailymeteo_api_key": {
       "type": "string",
-      "title": "DailyMeteo email (optional)",
-      "description": "Account at https://app.dailymeteo.com/ for daily values, credits, point history and area downloads. Leave empty to use only the free data.",
-      "sensitive": false
-    },
-    "dailymeteo_password": {
-      "type": "string",
-      "title": "DailyMeteo password (optional)",
-      "description": "Stored in the secure credential store.",
+      "title": "DailyMeteo API key (optional)",
+      "description": "From https://app.dailymeteo.com/ (Account), for daily values, which use the account's credits. Leave empty to use only the free data.",
       "sensitive": true
     }
   },

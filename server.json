@@ -8,12 +8,12 @@
     "url": "https://github.com/srpp011/dailymeteo-mcp",
     "source": "github"
   },
-  "version": "0.2.2",
+  "version": "0.3.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "dailymeteo-mcp",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
@@ -53,6 +53,20 @@
           "type": "named",
           "name": "--python",
           "value": "3.12"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.dailymeteo.com/mcp",
+      "headers": [
+        {
+          "name": "X-DailyMeteo-Api-Key",
+          "isRequired": false,
+          "isSecret": true,
+          "description": "DailyMeteo API key (https://app.dailymeteo.com/, Account), only for daily values"
         }
       ]
     }

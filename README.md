@@ -12,16 +12,22 @@ An [MCP](https://modelcontextprotocol.io/) server for [DailyMeteo](https://app.d
 
 **Easiest:** ask your AI assistant (Claude Code, Cursor, Cline…): *"Install the DailyMeteo MCP server from github.com/srpp011/dailymeteo-mcp"*. It will follow [llms-install.md](llms-install.md).
 
-**Claude Code plugin.** The plugin includes the server and a skill that tells Claude which tool to use. It asks for your DailyMeteo email and password, which are optional:
+**Claude Code plugin.** The plugin connects to the hosted server at `https://mcp.dailymeteo.com/mcp` and adds a skill that tells Claude which tool to use. Nothing is installed locally. It asks for a DailyMeteo API key (Account → API Keys), which is optional and only needed for daily values:
 
 ```
 claude plugin marketplace add srpp011/dailymeteo-mcp
 claude plugin install dailymeteo@dailymeteo
 ```
 
-The first start downloads about 60 MB. If the server shows *failed* in a new session, wait a minute and reconnect it with `/mcp`.
+**Hosted server in any client.** Add `https://mcp.dailymeteo.com/mcp` as a remote (streamable HTTP) MCP server. For daily values, send your API key in the `X-DailyMeteo-Api-Key` header, e.g. in Claude Code:
 
-All other clients need [uv](https://docs.astral.sh/uv/) and run `uvx --python 3.12 dailymeteo-mcp`. See [Configuration](#configuration).
+```
+claude mcp add --transport http dailymeteo https://mcp.dailymeteo.com/mcp --header "X-DailyMeteo-Api-Key: YOUR_KEY"
+```
+
+The hosted server has the tools that need no account on the server side: places and areas, values, normals, app links and the Zenodo archive list with download links. Account credits, point-history and area orders, and archive downloads to disk need the local server below.
+
+**Local server.** All tools, including the account ones. It needs [uv](https://docs.astral.sh/uv/) and runs with `uvx --python 3.12 dailymeteo-mcp`. See [Configuration](#configuration).
 
 ## Tools
 
@@ -51,6 +57,20 @@ All environment variables are optional. Without any of them, monthly and annual 
 - `DAILYMETEO_EMAIL` and `DAILYMETEO_PASSWORD`: your DailyMeteo account. They enable daily values, credits, point history and area downloads. Sign up at https://app.dailymeteo.com/.
 - `DAILYMETEO_API_KEY`: alternative for daily values only (Account → API Keys).
 - `DAILYMETEO_OUTPUT_DIR`: where CSV files and downloads are saved (default `~/dailymeteo`).
+
+### Running the hosted mode yourself
+
+`DAILYMETEO_MCP_REMOTE=1` starts the server over streamable HTTP at `/mcp` (stateless, JSON responses), with `/health` and `/files/<token>/<name>.csv` for CSV links that expire after one hour. In this mode the account tools and disk downloads are left out, and daily values use only the API key the client sends in `X-DailyMeteo-Api-Key` (or `Authorization: Bearer`), never one from the server's environment.
+
+- `DAILYMETEO_MCP_PUBLIC_URL`: public base URL for CSV links (e.g. `https://mcp.dailymeteo.com`).
+- `DAILYMETEO_MCP_HOST`, `DAILYMETEO_MCP_PORT`: listen address (default `0.0.0.0:8000`).
+- `DAILYMETEO_OUTPUT_DIR`: where the CSV files are kept.
+
+```
+docker run -d -p 8000:8000 -e DAILYMETEO_MCP_REMOTE=1 -e DAILYMETEO_MCP_PUBLIC_URL=https://mcp.example.org dailymeteo-mcp
+```
+
+Run it behind a reverse proxy with HTTPS. Requests to OpenStreetMap Nominatim are cached and sent at most one per second, as its usage policy asks.
 
 ### Claude Code
 

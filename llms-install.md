@@ -2,6 +2,19 @@
 
 Follow these steps when a user asks you to install the DailyMeteo MCP server. The server is the PyPI package `dailymeteo-mcp`. It runs locally over stdio with `uvx --python 3.12 dailymeteo-mcp`.
 
+**Claude Code: use the plugin, which needs no local install.** It connects to the hosted server at `https://mcp.dailymeteo.com/mcp` and adds a skill:
+
+```
+claude plugin marketplace add srpp011/dailymeteo-mcp
+claude plugin install dailymeteo@dailymeteo
+```
+
+It asks for an optional DailyMeteo API key (https://app.dailymeteo.com/, Account → API Keys), needed only for daily values. Tell the user to start a new session or run `/mcp` to load it, and stop here. The hosted server has no account tools (credits, point-history and area orders, downloads to disk); if the user needs those, continue with the local server below.
+
+Other clients that support remote MCP servers can also add `https://mcp.dailymeteo.com/mcp` (streamable HTTP), with the API key in the `X-DailyMeteo-Api-Key` header.
+
+The rest of this guide installs the local server.
+
 ## 1. Make sure `uv` is installed
 
 Run `uv --version`. If the command is not found, install uv:
@@ -14,16 +27,9 @@ Open a new shell afterwards so that `uvx` is on the PATH. Check with `uvx --pyth
 
 ## 2. Add the server to the user's client
 
-**Claude Code.** Install the plugin, which also teaches Claude when to use each tool:
+**Claude Code (local server).** Run `claude mcp add dailymeteo -s user -- uvx --python 3.12 dailymeteo-mcp`.
 
-```
-claude plugin marketplace add srpp011/dailymeteo-mcp
-claude plugin install dailymeteo@dailymeteo
-```
-
-If plugins are not available, use `claude mcp add dailymeteo -s user -- uvx --python 3.12 dailymeteo-mcp` instead.
-
-Then run `uvx --python 3.12 dailymeteo-mcp==0.2.2 --version` once. The first start downloads Python and packages (about 60 MB); doing it now keeps the client's start-up check from timing out. Tell the user to start a new session, or run `/mcp` and reconnect, to load the server.
+Then run `uvx --python 3.12 dailymeteo-mcp --version` once. The first start downloads Python and packages (about 60 MB); doing it now keeps the client's start-up check from timing out. Tell the user to start a new session, or run `/mcp` and reconnect, to load the server.
 
 **Claude Desktop.** Open the config file through Settings → Developer → Edit Config. Do not guess its path: Microsoft Store installs keep it in a different place. Add the following under `mcpServers`, keeping every other key, then quit Claude Desktop completely (tray icon → Quit) and start it again:
 

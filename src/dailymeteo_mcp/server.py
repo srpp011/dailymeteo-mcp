@@ -11,6 +11,10 @@ import json
 import math
 import os
 import re
+import secrets
+import shutil
+import threading
+import time
 from datetime import date
 from pathlib import Path
 from typing import Annotated, Literal, Optional
@@ -21,10 +25,13 @@ import pandas as pd
 import requests
 from dailymeteo import meteoeurope1km as meu
 from dailymeteo._http import USER_AGENT, session
-from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver import Context, MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
 from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import FileResponse, JSONResponse, Response
 
 from . import __version__
 
@@ -40,11 +47,44 @@ PERIODS = ("1961-1990", "1991-2020")
 CONFIRM_ABOVE = 1000  # same rule as the DailyMeteo app: day requests over 1,000 credits need confirmation
 MAX_LISTED_ROWS = 400
 
-INSTRUCTIONS = f"""\
+# Remote mode: one shared server over HTTP (e.g. https://mcp.dailymeteo.com/mcp). Nothing from the server's own
+# environment may act for a user there, so account tools and disk downloads are left out, and daily values use
+# the API key each client sends in its request headers.
+REMOTE = os.environ.get("DAILYMETEO_MCP_REMOTE", "").strip() == "1"
+PUBLIC_URL = (os.environ.get("DAILYMETEO_MCP_PUBLIC_URL") or "http://127.0.0.1:8000").rstrip("/")
+KEY_HEADER = "X-DailyMeteo-Api-Key"
+CSV_TTL_S = 3600
+LOCAL_ONLY = ("account_status", "request_point_history", "estimate_area_download", "request_area_download",
+              "download_gridded_files")
+
+COMMON = """\
 DailyMeteo: gridded weather data at 1 km for land areas worldwide, from 1961 to the present (the latest
 days lag by a few days), interpolated from GHCN-Daily, ECA&D and GSOD station observations.
 Variables: tmean, tmax, tmin (°C) and prcp (mm). Monthly/annual precipitation are totals, temperatures means.
+"""
+FOOTER = f"""
+Values for the sea or outside the data are null. The data are interpolated grids, not station
+measurements. Cite results as: {CITATION}
+"""
 
+REMOTE_INSTRUCTIONS = COMMON + f"""
+Tools:
+- find_location: place name -> lat/lon. find_area: place name -> polygon of a named area.
+- get_weather: values for a location, one or more variables, daily / monthly / annual. Monthly and annual
+  are free. Daily costs 1 credit per day and variable and needs the user's DailyMeteo API key (from
+  https://app.dailymeteo.com/, Account), sent by the client in the {KEY_HEADER} header; requests over
+  {CONFIRM_ABOVE} credits need confirm_credits=true after the user agreed to the cost. Long series are
+  summarised (with yearly aggregates) and given as a CSV link valid for one hour.
+- get_climate_normals: normals 1961-1990 and 1991-2020 and their change (free).
+- app_link: link that opens the location and series in the DailyMeteo app (map and chart).
+- list_gridded_files: MeteoEurope1km raster archives (Europe, 1961-2020, incl. sea-level pressure) on Zenodo,
+  free, with direct download links.
+
+Account credits, full point-history and area orders by email, and archive downloads to disk are in the
+DailyMeteo app or the local version of this server (uvx dailymeteo-mcp).
+""" + FOOTER
+
+INSTRUCTIONS = COMMON + f"""
 Tools:
 - find_location: place name -> lat/lon. find_area: place name -> polygon for area downloads.
 - get_weather: values for a location, one or more variables, daily / monthly / annual. Monthly and annual
@@ -59,12 +99,9 @@ Tools:
 - app_link: link that opens the location and series in the DailyMeteo app (map and chart).
 - list_gridded_files / download_gridded_files: MeteoEurope1km raster archives (Europe, 1961-2020,
   incl. sea-level pressure) on Zenodo, free.
+""" + FOOTER
 
-Values for the sea or outside the data are null. The data are interpolated grids, not station
-measurements. Cite results as: {CITATION}
-"""
-
-mcp = MCPServer("dailymeteo", title="DailyMeteo", instructions=INSTRUCTIONS,
+mcp = MCPServer("dailymeteo", title="DailyMeteo", instructions=REMOTE_INSTRUCTIONS if REMOTE else INSTRUCTIONS,
                 website_url="https://app.dailymeteo.com/", version=__version__)
 
 READ = ToolAnnotations(readOnlyHint=True, openWorldHint=True)
@@ -114,14 +151,50 @@ def _require_account() -> dm.Account:
     return a
 
 
+def _request_key(ctx: Context | None) -> str | None:
+    """API key the client sent with this HTTP request (X-DailyMeteo-Api-Key, or Authorization: Bearer)."""
+    try:
+        headers = ctx.headers if ctx is not None else None
+    except ValueError:  # no request (direct call)
+        headers = None
+    if not headers:
+        return None
+    v = (headers.get(KEY_HEADER.lower()) or headers.get(KEY_HEADER) or "").strip()
+    if not v:
+        auth = (headers.get("authorization") or headers.get("Authorization") or "").strip()
+        v = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+    return None if not v or v.startswith("${") else v
+
+
 def _output_dir() -> Path:
     folder = Path(os.environ.get("DAILYMETEO_OUTPUT_DIR") or Path.home() / "dailymeteo")
     folder.mkdir(parents=True, exist_ok=True)
     return folder
 
 
+def _shared_dir() -> Path:
+    """Remote mode: CSV files served for one hour at /files/<token>/<name>."""
+    folder = _output_dir() / "shared"
+    folder.mkdir(parents=True, exist_ok=True)
+    cutoff = time.time() - CSV_TTL_S
+    for d in folder.iterdir():
+        try:
+            if d.stat().st_mtime < cutoff:
+                shutil.rmtree(d, ignore_errors=True)
+        except OSError:
+            pass
+    return folder
+
+
 def _save_csv(df: pd.DataFrame, stem: str) -> str:
-    path = _output_dir() / f"{re.sub(r'[^A-Za-z0-9_.-]+', '_', stem)}.csv"
+    name = f"{re.sub(r'[^A-Za-z0-9_.-]+', '_', stem)}.csv"
+    if REMOTE:
+        token = secrets.token_urlsafe(16)
+        d = _shared_dir() / token
+        d.mkdir()
+        df.to_csv(d / name, index=False)
+        return f"{PUBLIC_URL}/files/{token}/{name}"
+    path = _output_dir() / name
     df.to_csv(path, index=False)
     return str(path)
 
@@ -219,13 +292,30 @@ def _to_wkt(geo: dict, max_points: int = 400) -> str:
     raise ValueError(f"no polygon for this place (got {geo['type']})")
 
 
-def _nominatim(query: str, limit: int, polygon: bool = False) -> list[dict]:
+_NOMINATIM_LOCK = threading.Lock()
+_nominatim_last = [0.0]
+
+
+@functools.lru_cache(maxsize=4096)
+def _nominatim_raw(query: str, limit: int, polygon: bool) -> str:
+    """Nominatim allows one request per second per client; a shared server sends them one at a time."""
     params = {"q": query, "format": "json", "limit": limit}
     if polygon:
         params |= {"polygon_geojson": 1, "polygon_threshold": 0.002}
-    r = session().get(dm.api.NOMINATIM_URL, params=params, headers={"User-Agent": USER_AGENT}, timeout=60)
+    with _NOMINATIM_LOCK:
+        wait = _nominatim_last[0] + 1.1 - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+        try:
+            r = session().get(dm.api.NOMINATIM_URL, params=params, headers={"User-Agent": USER_AGENT}, timeout=60)
+        finally:
+            _nominatim_last[0] = time.monotonic()
     r.raise_for_status()
-    hits = r.json()
+    return r.text
+
+
+def _nominatim(query: str, limit: int, polygon: bool = False) -> list[dict]:
+    hits = json.loads(_nominatim_raw(" ".join(query.split()), limit, polygon))
     if not hits:
         raise ToolError(f"no place found for {query!r}; try adding the country")
     return hits
@@ -270,12 +360,13 @@ def get_weather(
     dates: Annotated[Optional[list[str]], Field(description="Individual dates instead of a range, same format")] = None,
     confirm_credits: Annotated[bool, Field(description=f"Set true only after the user agreed to a day request over {CONFIRM_ABOVE} credits")] = False,
     save_csv: Annotated[bool, Field(description="Save the table as CSV (long series are always saved)")] = False,
+    ctx: Context | None = None,
 ) -> dict:
     """Daily, monthly or annual values for one location and one or more variables, 1961 to the present.
 
-    Monthly and annual values are free. Daily values cost 1 credit per day and variable and need an
-    account or API key in the server configuration. Results include a summary per variable; series longer
-    than 400 rows are not listed but summarised by year and saved as CSV.
+    Monthly and annual values are free. Daily values cost 1 credit per day and variable and need the
+    user's DailyMeteo API key or account (see the server instructions). Results include a summary per
+    variable; series longer than 400 rows are not listed but summarised by year and saved as CSV.
     """
     if dates:
         _check_dates(time_scale, dates)
@@ -289,11 +380,17 @@ def get_weather(
     else:
         raise ToolError("give start and end, or dates")
 
-    key, acct = _env("DAILYMETEO_API_KEY"), None
+    # remote: only the key this user sent; never the server's own environment
+    key = _request_key(ctx) if REMOTE else _env("DAILYMETEO_API_KEY")
+    acct = None
     credits = 0
     if time_scale == "day":
-        acct = _account()
+        acct = None if REMOTE else _account()
         if not (key or acct):
+            if REMOTE:
+                raise ToolError(f"daily values need the user's DailyMeteo API key (https://app.dailymeteo.com/ → Account), "
+                                f"sent with the connection in the {KEY_HEADER} header (in the Claude Code plugin: "
+                                "/plugin, DailyMeteo, Configure). Monthly and annual values are free.")
             raise ToolError("daily values need DAILYMETEO_API_KEY, or DAILYMETEO_EMAIL and DAILYMETEO_PASSWORD, "
                             "in the MCP server configuration (https://app.dailymeteo.com/ → Account)")
         credits = n_dates * len(variables)
@@ -471,7 +568,8 @@ def list_gridded_files(variable: GridVariable, product: Product = "day", years: 
     Rasters are Equi7 Europe (EPSG:27704), Int16 in tenths of the unit (°C, mm, hPa), NoData -9999.
     """
     t = meu.files(var=variable, product=product, years=years, period=period)
-    return {"files": [{"file": r.file, "size_mb": round(r.size / 1e6), "zenodo_record": f"https://doi.org/{r.doi}"} for r in t.itertuples()],
+    return {"files": [{"file": r.file, "size_mb": round(r.size / 1e6), "zenodo_record": f"https://doi.org/{r.doi}",
+                       "download_url": r.url, "md5": r.md5} for r in t.itertuples()],
             "total_gb": round(float(t["size"].sum()) / 1e9, 2), "citation": CITATION}
 
 
@@ -495,6 +593,38 @@ def download_gridded_files(
             "total_gb": round(float(out["size"].sum()) / 1e9, 2), "citation": CITATION}
 
 
+if REMOTE:
+    for _name in LOCAL_ONLY:
+        mcp.remove_tool(_name)
+
+
+# --- HTTP routes (remote mode) ---------------------------------------------------------------------
+@mcp.custom_route("/health", methods=["GET"], include_in_schema=False)
+async def health(request: Request) -> Response:
+    return JSONResponse({"status": "ok", "version": __version__})
+
+
+@mcp.custom_route("/files/{token}/{name}", methods=["GET"], include_in_schema=False)
+async def shared_file(request: Request) -> Response:
+    token, name = request.path_params["token"], request.path_params["name"]
+    if not (REMOTE and re.fullmatch(r"[A-Za-z0-9_-]{16,64}", token) and re.fullmatch(r"[A-Za-z0-9_.-]+\.csv", name)):
+        return Response(status_code=404)
+    path = _output_dir() / "shared" / token / name
+    if not path.is_file() or path.stat().st_mtime < time.time() - CSV_TTL_S:
+        return Response("expired or not found", status_code=404)
+    return FileResponse(path, media_type="text/csv", filename=name)
+
+
+def http_app():
+    """Remote mode ASGI app: MCP at /mcp, plus /health and /files.
+
+    Runs behind a reverse proxy that routes only its own host name, so the SDK's Host-header check (meant for
+    servers on localhost) is off. Stateless: any request can reach any worker and restarts drop no sessions.
+    """
+    return mcp.streamable_http_app(streamable_http_path="/mcp", stateless_http=True, json_response=True,
+                                   transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False))
+
+
 def main() -> None:
     import sys
 
@@ -502,7 +632,14 @@ def main() -> None:
         # quick install check for people and agents; without it the server waits on stdin
         print(f"dailymeteo-mcp {__version__}")
         return
-    mcp.run()
+    if not REMOTE:
+        mcp.run()
+        return
+    import uvicorn
+
+    uvicorn.run(http_app(), host=os.environ.get("DAILYMETEO_MCP_HOST", "0.0.0.0"),
+                port=int(os.environ.get("DAILYMETEO_MCP_PORT", "8000")), proxy_headers=True,
+                forwarded_allow_ips=os.environ.get("DAILYMETEO_MCP_PROXY_IPS", "*"))
 
 
 if __name__ == "__main__":

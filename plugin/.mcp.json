@@ -1,11 +1,10 @@
 {
   "mcpServers": {
     "dailymeteo": {
-      "command": "uvx",
-      "args": ["--python", "3.12", "dailymeteo-mcp==0.2.2"],
-      "env": {
-        "DAILYMETEO_EMAIL": "${user_config.dailymeteo_email}",
-        "DAILYMETEO_PASSWORD": "${user_config.dailymeteo_password}"
+      "type": "http",
+      "url": "https://mcp.dailymeteo.com/mcp",
+      "headers": {
+        "X-DailyMeteo-Api-Key": "${user_config.dailymeteo_api_key}"
       }
     }
   }
