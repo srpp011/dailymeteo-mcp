@@ -60,7 +60,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://mcp.dailymeteo.com/mcp",
+      "url": "https://mcp.gilab.rs/mcp",
       "headers": [
         {
           "name": "X-DailyMeteo-Api-Key",

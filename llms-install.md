@@ -2,7 +2,7 @@
 
 Follow these steps when a user asks you to install the DailyMeteo MCP server. The server is the PyPI package `dailymeteo-mcp`. It runs locally over stdio with `uvx --python 3.12 dailymeteo-mcp`.
 
-**Claude Code: use the plugin, which needs no local install.** It connects to the hosted server at `https://mcp.dailymeteo.com/mcp` and adds a skill:
+**Claude Code: use the plugin, which needs no local install.** It connects to the hosted server at `https://mcp.gilab.rs/mcp` and adds a skill:
 
 ```
 claude plugin marketplace add srpp011/dailymeteo-mcp
@@ -11,7 +11,7 @@ claude plugin install dailymeteo@dailymeteo
 
 It asks for an optional DailyMeteo API key (https://app.dailymeteo.com/, Account → API Keys), needed only for daily values. Tell the user to start a new session or run `/mcp` to load it, and stop here. The hosted server has no account tools (credits, point-history and area orders, downloads to disk); if the user needs those, continue with the local server below.
 
-Other clients that support remote MCP servers can also add `https://mcp.dailymeteo.com/mcp` (streamable HTTP), with the API key in the `X-DailyMeteo-Api-Key` header.
+Other clients that support remote MCP servers can also add `https://mcp.gilab.rs/mcp` (streamable HTTP), with the API key in the `X-DailyMeteo-Api-Key` header.
 
 The rest of this guide installs the local server.
 

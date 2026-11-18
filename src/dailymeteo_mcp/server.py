@@ -47,7 +47,7 @@ PERIODS = ("1961-1990", "1991-2020")
 CONFIRM_ABOVE = 1000  # same rule as the DailyMeteo app: day requests over 1,000 credits need confirmation
 MAX_LISTED_ROWS = 400
 
-# Remote mode: one shared server over HTTP (e.g. https://mcp.dailymeteo.com/mcp). Nothing from the server's own
+# Remote mode: one shared server over HTTP (e.g. https://mcp.gilab.rs/mcp). Nothing from the server's own
 # environment may act for a user there, so account tools and disk downloads are left out, and daily values use
 # the API key each client sends in its request headers.
 REMOTE = os.environ.get("DAILYMETEO_MCP_REMOTE", "").strip() == "1"

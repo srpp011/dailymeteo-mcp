@@ -2,7 +2,7 @@
   "mcpServers": {
     "dailymeteo": {
       "type": "http",
-      "url": "https://mcp.dailymeteo.com/mcp",
+      "url": "https://mcp.gilab.rs/mcp",
       "headers": {
         "X-DailyMeteo-Api-Key": "${user_config.dailymeteo_api_key}"
       }
